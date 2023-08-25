@@ -1,0 +1,127 @@
+  <!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Query without Map</title>
+
+    <script src="https://js.arcgis.com/3.41/"></script>
+    <script>
+     require([
+        "dojo/dom", "dojo/on",
+        "esri/tasks/query", "esri/tasks/QueryTask", "dojo/domReady!"
+      ], function (dom, on, Query, QueryTask) {
+
+        var queryTask = new QueryTask("https://mcogis.co.marion.oh.us/arcgis/rest/services/Delinquent_Foreclosure_Dashboard/MapServer/0");
+
+        var query = new Query();
+        query.returnGeometry = false;
+        query.outFields = [
+          "PIN", "OWNER1", "OWNER2", "OWNER3", "OWNER4", "TOTMKVAL"
+        ];
+
+        on(dom.byId("execute"), "click", execute);
+
+        function execute () {
+         query.where = "PIN LIKE '" + dom.byId("userinput").value + "%'";
+          queryTask.execute(query, showResults);
+        }
+
+        function showResults (results) {
+          var resultItems = [];
+          var resultCount = results.features.length;
+          for (var i = 0; i < resultCount; i++) {
+            var featureAttributes = results.features[i].attributes;
+            for (var attr in featureAttributes) {
+              resultItems.push("<b>" + attr + ":</b>  " + featureAttributes[attr] + "<br>");
+            }
+            resultItems.push("<br>");
+          }
+          dom.byId("info").innerHTML = resultItems.join("");
+          
+        }
+      });
+      require([
+        "dojo/dom", "dojo/on",
+        "esri/tasks/query", "esri/tasks/QueryTask", "dojo/domReady!"
+      ], function (dom, on, Query, QueryTask) {
+
+        var queryTask = new QueryTask("https://mcogis.co.marion.oh.us/arcgis/rest/services/Delinquent_Foreclosure_Dashboard/MapServer/0");
+
+        var query = new Query();
+        query.returnGeometry = false;
+        query.outFields = [
+          "PIN", "OWNER1", "OWNER2", "OWNER3", "OWNER4", "TOTMKVAL"
+        ];
+
+        on(dom.byId("execute"), "click", execute);
+
+        function execute () {
+         query.where = "OWNER1 LIKE '" + dom.byId("userinput").value + "%'";
+          queryTask.execute(query, showResults);
+        }
+
+        function showResults (results) {
+          var resultItems = [];
+          var resultCount = results.features.length;
+          for (var i = 0; i < resultCount; i++) {
+            var featureAttributes = results.features[i].attributes;
+            for (var attr in featureAttributes) {
+              resultItems.push("<b>" + attr + ":</b>  " + featureAttributes[attr] + "<br>");
+            }
+            resultItems.push("<br>");
+          }
+          dom.byId("info").innerHTML = resultItems.join("");
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Basic FindTask</title>
+
+    <script src="https://js.arcgis.com/3.41/"></script>
+    <script>
+      dojo.require("esri.tasks.find");
+
+      var find, params;
+      function init() {
+        find = new esri.tasks.FindTask("https://mcogis.co.marion.oh.us/arcgis/rest/services/TRIUPDATE2022/MapServer");
+        params = new esri.tasks.FindParameters();
+        params.layerIds = [0];
+        params.searchFields = ["PIN_1","OWNER","Address_2"];
+      }
+
+      function doFind() {
+        params.searchText = dojo.byId("searchText").value;
+        find.execute(params, showResults);
+      }
+
+      function showResults(results) {
+        var result, attribs;
+        var s = ["<table border=\"solid black;border-collapse: collapse\"><thead><tr style=\"background-color:#ccc;font-family:Arial,sansserif;font-size:15px;font-weight: bold\"><td>PIN</td><td>Owner</td><td>Property Address</td><td>City/State/ZIP</td><td>Current Value</td><td>Proposed Value</td></tr></thead><tbody id=\"states\">"];
+        dojo.forEach(results,function(result){
+          // Note: Find return the "alias" field names
+          attribs = result.feature.attributes;
+           s.push("<tr style=\"font-family:Arial,sans-serif;font-size:15px;\"><td>" + attribs.PIN_1 + "</td><td>" + attribs.OWNER + "</td><td>" + attribs.Address_2 + "</td><td>" + attribs.Address_3 + "</td><td>" + attribs.CURTOT  + "</td><td>" + attribs.NEWTOT  + "</td></tr>");
+        });
+        s.push("</tbody></table>");
+        dojo.byId("tbl").innerHTML = s.join("");
+      }
+
+      dojo.ready(init);
+    </script>
+
+  </head>
+   
+  <body class="claro">
+   Search by Owner, Property Address or Parcel Number. Click or tap "Search" to view results.
+   <input type="text" id="searchText" size="40" value="" />
+
+    <input type="button" value="Search" onclick="doFind()" />
+    
+    <div id="tbl"></div>
+  </body>
+ 
+</html>
